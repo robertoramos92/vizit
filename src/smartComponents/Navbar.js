@@ -2,13 +2,20 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import AppBar from '@material-ui/core/AppBar'
 import { withStyles} from '@material-ui/core/styles'
-import { Toolbar, Typography, IconButton, Grid, InputBase, Icon } from '@material-ui/core'
+import { Toolbar, Typography, IconButton, InputBase, Tooltip } from '@material-ui/core'
 import SearchIcon from '@material-ui/icons/Search'
 import { fade } from '@material-ui/core/styles/colorManipulator'
 import Settings from '@material-ui/icons/Settings'
 import CreditCard from '@material-ui/icons/CreditCard'
 import Forum from '@material-ui/icons/Forum'
 import QueueMusic from '@material-ui/icons/QueueMusic'
+import Power from '@material-ui/icons/Power'
+import { Link, withRouter } from 'react-router-dom'
+import * as ROUTES from '../constants/routes'
+import {auth as autorize } from '../firebase/index'
+import '../App.css'
+import Error from '@material-ui/icons/Error'
+import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux'
 
 const styles = theme => ({
     ButtonWrapper:{
@@ -31,7 +38,7 @@ const styles = theme => ({
       },
       search: {
         position: 'relative',
-        borderRadius: theme.shape.borderRadius,
+        borderRadius: '20px',
         backgroundColor: fade(theme.palette.common.white, 0.15),
         '&:hover': {
           backgroundColor: fade(theme.palette.common.white, 0.25),
@@ -74,15 +81,54 @@ const styles = theme => ({
 
 })
 
+const AlertDrawer = ({error, errorMessage}) => {
+  if(error) {
+      return (
+          <div className="alertDrawer NavCute">
+          <div className="alertContainer">
+            <Error className="errorIcon"/>
+            </div>
+          <div className="alertContainer">
+          Hang on a bit, we received the following error: {errorMessage}. 
+          <br/>Try logging out again in a while. If it persists, contact us.
+          </div>
+        </div>
+      );
+      
+  }
+}
 
-function Navbar(props) {
-    const {classes} = props;
+
+
+class Navbar extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      error: null
+    }
+  }
+    signOut = () => {
+      const {history} = this.props
+      autorize.doSignOut().then(() => {
+        history.push(ROUTES.LOG_OUT);
+
+      }).catch((error) => {
+        this.setState({
+          error
+        })
+      })
+    }
+    render() {
+
+    const {classes} = this.props;
     return (
+      <React.Fragment>
+      {this.state.error && <AlertDrawer error errorMessage={this.state.error.message}/> }
         <AppBar position="fixed" color="primary" className={classes.appBar}>
           
           <Toolbar className={classes.Toolbar} >
             <Typography variant="h6" color="default">
-              VIZIT
+              <Link to={ROUTES.HOME}>VIZIT</Link> 
             </Typography>
             <div className={classes.ButtonWrapper}>
               <IconButton>
@@ -108,17 +154,31 @@ function Navbar(props) {
               }}
             />
           </div>
-          <IconButton>
-            <Settings/>
-          </IconButton>
+          <Tooltip title="Settings">
+              <IconButton>
+                <Link to={ROUTES.SETTINGS}><Settings/></Link>
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Log Out">
+              <IconButton>
+                <Power onClick={this.signOut}/>
+              </IconButton>
+            </Tooltip>
           </Toolbar>
           
           </AppBar>
+        </React.Fragment>
     )
+}}
+
+function mapStateToProps(state, ownProps) {
+  return {
+
+  }
 }
 
 Navbar.propTypes = {
     classes: PropTypes.object.isRequired,
   };
   
-  export default withStyles(styles)(Navbar);
+  export default withRouter(withStyles(styles)(connect(mapStateToProps)(Navbar)));

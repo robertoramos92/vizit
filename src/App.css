@@ -30,3 +30,34 @@
     transform: rotate(360deg);
   }
 }
+
+a {
+  color: white !important;
+  text-decoration: none;
+}
+
+
+body {
+  background-color: #111219;
+
+}
+
+.alertDrawer {
+  display: inline-flex;
+  padding:1em;
+  border-radius: 5px;
+  background-color: #ED9390 !important;
+  color: white !important;
+}
+.NavCute {
+  position: fixed;
+  bottom: 5.5em;
+}
+.errorIcon {
+  vertical-align:'middle';
+  margin-right: '1em';
+}
+.alertContainer {
+  padding: 1em;
+  
+}
